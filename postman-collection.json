@@ -1,0 +1,140 @@
+{
+  "info": {
+    "name": "TaskApp API - Dynamic",
+    "_postman_id": "d8f2a7b2-1234-5678-9012-abcdef123456",
+    "description": "Postman collection untuk testing TaskApp CRUD endpoints dengan environment variables untuk data dinamis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Insert Task",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{taskTitle}}\",\n  \"description\": \"{{taskDescription}}\",\n  \"organizationId\": \"{{organizationId}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:7071/api/tasks",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7071",
+          "path": ["api","tasks"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set('taskId', jsonData.data.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "description": "Membuat task baru. `taskId` akan disimpan ke environment untuk request berikutnya."
+    },
+    {
+      "name": "Get Task",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:7071/api/tasks/{{taskId}}?organizationId={{organizationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7071",
+          "path": ["api","tasks","{{taskId}}"],
+          "query": [
+            { "key": "organizationId", "value": "{{organizationId}}" }
+          ]
+        }
+      },
+      "response": [],
+      "description": "Ambil task menggunakan `{{taskId}}` dari Insert Task."
+    },
+    {
+      "name": "Update Task",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Updated {{taskTitle}}\",\n  \"description\": \"Updated {{taskDescription}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:7071/api/tasks/{{taskId}}?organizationId={{organizationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7071",
+          "path": ["api","tasks","{{taskId}}"],
+          "query": [
+            { "key": "organizationId", "value": "{{organizationId}}" }
+          ]
+        }
+      },
+      "response": [],
+      "description": "Update task dengan data dinamis dari environment."
+    },
+    {
+      "name": "Delete Task",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:7071/api/tasks/{{taskId}}?organizationId={{organizationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7071",
+          "path": ["api","tasks","{{taskId}}"],
+          "query": [
+            { "key": "organizationId", "value": "{{organizationId}}" }
+          ]
+        }
+      },
+      "response": [],
+      "description": "Hapus task berdasarkan ID yang tersimpan di environment."
+    },
+    {
+      "name": "Bulk Delete Tasks",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "[\"{{taskId1}}\",\"{{taskId2}}\"]"
+        },
+        "url": {
+          "raw": "http://localhost:7071/api/tasks/bulk?organizationId={{organizationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "7071",
+          "path": ["api","tasks","bulk"],
+          "query": [
+            { "key": "organizationId", "value": "{{organizationId}}" }
+          ]
+        }
+      },
+      "response": [],
+      "description": "Hapus beberapa task sekaligus. Task ID bisa diset di environment."
+    }
+  ],
+  "variable": [
+    { "key": "taskId", "value": "", "type": "string" },
+    { "key": "taskId1", "value": "", "type": "string" },
+    { "key": "taskId2", "value": "", "type": "string" },
+    { "key": "taskTitle", "value": "Test Task", "type": "string" },
+    { "key": "taskDescription", "value": "Deskripsi Task", "type": "string" },
+    { "key": "organizationId", "value": "org1", "type": "string" }
+  ]
+}

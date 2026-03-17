@@ -1,5 +1,13 @@
-import { app } from '@azure/functions';
+import { app } from "@azure/functions";
 
 app.setup({
-    enableHttpStream: true,
+  enableHttpStream: true,
 });
+
+// IMPORT SEMUA FUNCTION
+import "./functions/GetTasks";
+import "./functions/GetTask";
+import "./functions/InsertTask";
+import "./functions/UpdateTask";
+import "./functions/DeleteTask";
+import "./functions/BulkDeleteTasks";
