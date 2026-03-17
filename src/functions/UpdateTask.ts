@@ -1,6 +1,7 @@
 import { CosmosClient, PatchOperation } from "@azure/cosmos";
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { success, error } from "../utils/response";
+import { UpdateTaskSchema } from "../validators/TaskValidator";
 
 const cosmosConnection = process.env.COSMOS_CONNECTION_STRING!;
 const databaseName = process.env.COSMOS_DATABASE_NAME || "TaskApp";
@@ -25,21 +26,25 @@ export async function UpdateTask(
       };
     }
 
-    const body = (await request.json()) as Record<string, unknown>;
+    const body = await request.json();
 
-    if (!body || Object.keys(body).length === 0) {
+    const parseResult = UpdateTaskSchema.safeParse(body);
+    if (!parseResult.success || Object.keys(parseResult.data).length === 0) {
+      const firstError = parseResult.success
+        ? { message: "Request body cannot be empty" }
+        : parseResult.error.issues[0];
       return {
         status: 400,
-        jsonBody: error("Request body cannot be empty")
+        jsonBody: error(firstError.message)
       };
     }
 
-    body.updatedAt = new Date().toISOString();
+    parseResult.data.updatedAt = new Date().toISOString();
 
-    const patchRequests: PatchOperation[] = Object.keys(body).map((key) => ({
+    const patchRequests: PatchOperation[] = Object.keys(parseResult.data).map((key) => ({
       op: "replace",
       path: `/${key}`,
-      value: body[key]
+      value: parseResult.data[key as keyof typeof parseResult.data]
     }));
 
     const container = client.database(databaseName).container(containerName);
@@ -61,7 +66,6 @@ export async function UpdateTask(
     };
   } catch (err) {
     context.log("UpdateTask error:", err);
-
     return {
       status: 500,
       jsonBody: error("Internal server error")

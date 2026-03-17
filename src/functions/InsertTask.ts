@@ -4,6 +4,7 @@ import { initCosmos } from "../config/InitCosmos";
 import { Task } from "../models/Task";
 import { randomUUID } from "crypto";
 import { success, error } from "../utils/response";
+import { InsertTaskSchema } from "../validators/TaskValidator";
 
 export async function InsertTask(
   request: HttpRequest,
@@ -14,18 +15,21 @@ export async function InsertTask(
 
     await initCosmos();
 
-    const body = (await request.json()) as Omit<Task, "id">;
+    const body = await request.json();
 
-    if (!body || Object.keys(body).length === 0) {
+    const parseResult = InsertTaskSchema.safeParse(body);
+    if (!parseResult.success) {
+      const firstError = parseResult.error.issues[0];
       return {
         status: 400,
-        jsonBody: error("Request body is required")
+        jsonBody: error(firstError.message)
       };
     }
 
     const task: Task = {
       id: randomUUID(),
-      ...body,
+      ...parseResult.data,
+      status: parseResult.data.status || "open",
       createdAt: new Date().toISOString()
     };
 
@@ -39,7 +43,6 @@ export async function InsertTask(
     };
   } catch (err) {
     context.log("InsertTask error:", err);
-
     return {
       status: 500,
       jsonBody: error("Internal server error")
