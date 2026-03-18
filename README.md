@@ -83,3 +83,7 @@ Disarankan gunakan Postman environment dengan variable:
 taskId, taskId1, taskId2, taskTitle, taskDescription, organizationId
 
 Bulk Delete dan CRUD endpoints siap untuk testing dinamis
+
+## 8. Repository FE
+
+Repository FE sudah disiapkan di `https://github.com/iamelse/kitameraki-fe`
