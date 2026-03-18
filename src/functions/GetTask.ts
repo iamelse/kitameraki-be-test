@@ -64,5 +64,5 @@ app.http("GetTask", {
   methods: ["GET"],
   authLevel: "anonymous",
   handler: GetTask,
-  route: "tasks/{id}",
+  route: "tasks/show/{id}",
 });

@@ -5,11 +5,15 @@ import { Task } from "../models/Task";
 import { randomUUID } from "crypto";
 import { success, error } from "../utils/response";
 import { InsertTaskSchema } from "../validators/TaskValidator";
+import { corsHeaders, handlePreflight } from "../utils/cors";
 
 export async function InsertTask(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
+  const preflight = handlePreflight(request.method);
+  if (preflight) return preflight;
+
   try {
     context.log(`InsertTask request: ${request.url}`);
 
@@ -22,7 +26,8 @@ export async function InsertTask(
       const firstError = parseResult.error.issues[0];
       return {
         status: 400,
-        jsonBody: error(firstError.message)
+        headers: corsHeaders,
+        jsonBody: error(firstError.message),
       };
     }
 
@@ -30,7 +35,7 @@ export async function InsertTask(
       id: randomUUID(),
       ...parseResult.data,
       status: parseResult.data.status || "open",
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     const { resource } = await container.items.create(task);
@@ -39,20 +44,22 @@ export async function InsertTask(
 
     return {
       status: 201,
-      jsonBody: success(cleanTask, { message: "Task created successfully" })
+      headers: corsHeaders,
+      jsonBody: success(cleanTask, { message: "Task created successfully" }),
     };
   } catch (err) {
     context.log("InsertTask error:", err);
     return {
       status: 500,
-      jsonBody: error("Internal server error")
+      headers: corsHeaders,
+      jsonBody: error("Internal server error"),
     };
   }
 }
 
 app.http("InsertTask", {
-  methods: ["POST"],
+  methods: ["POST", "OPTIONS"],
   authLevel: "anonymous",
   handler: InsertTask,
-  route: "tasks"
+  route: "tasks/store",
 });

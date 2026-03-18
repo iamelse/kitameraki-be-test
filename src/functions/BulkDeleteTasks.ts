@@ -40,5 +40,5 @@ app.http("BulkDeleteTasks", {
   methods: ["DELETE"],
   authLevel: "anonymous",
   handler: BulkDeleteTasks,
-  route: "tasks/bulk"
+  route: "tasks/mass/delete"
 });
